@@ -11,8 +11,8 @@ Wemos D1 mini - GPS neo6m - Oled  - buttons
 GND           - GNC       - GND   - GND (with resistor 10k)
 D2 (gpio4)sda - nc        - SDA   - nc
 D1 (gpio5)scl - nc        - SCK   - nc
-D5 (gpio14)    - TX        - nc    - nc
-D6 (gpio12)    - RX        - nc    - nc
+D5 (gpio14)   - TX        - nc    - nc
+D6 (gpio12)   - RX        - nc    - nc
 D0 (gpio16)   - nc        - nc    - button 1 (menu)
 D7 (gpio13)   - nc        - nc    - button 2 (select). because of non-working input ports D3/D4 (which I melted by 5v input signal), its possible to manage all commands by only 1 button, and freeup HSPI 4 pins for sd card, for example. To avoid using 2nd button, select by short press, and menu change by long press...
 usually gpio 12.13.14.15 are used for HSPI connections... so change buttonn pins to D3/D4 if you need SPI.
@@ -50,32 +50,15 @@ technical message from tutorial:
 //++++++++++++++++++++blynk needs+++++++++
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
+#define BLYNK_PRINT Serial // for debugging 
+char auth[] = "_lIcCNiBkZcEVbGPwIo8mvUBozLuz5En"; // access token/id from blynk website
+char ssid[] = "ASUS_X018D";  // any internet source
+char pass[] = "12345678#";   // wifi password
 
-char auth[] = "_________"; // get key from Blynk website registering              
-char ssid[] = "______";  //wifi router or any other internet souece - ID
-char pass[] = "______#"; // password
-
-/*  it was in the tutorial, but we use virtual pins, so better get data directly from them later
-BLYNK_WRITE(V1) {
-  GpsParam gps(param);
-  // Print 6 decimal places for Lat, Lon
-  Serial.print("Lat: ");
-  Serial.println(gps.getLat(), 7);
-  Serial.print("Lon: ");
-  Serial.println(gps.getLon(), 7);
-  // Print 2 decimal places for Alt, Speed
-  Serial.print("Altitute: ");
-  Serial.println(gps.getAltitude(), 2);
-  Serial.print("Speed: ");
-  Serial.println(gps.getSpeed(), 2);
-  Serial.println();
-}
-*/
 //--------------------blynk needs---------------
 
 
 #define LAST_SENTENCE_IN_INTERVAL NMEAGPS::NMEA_RMC //for gps percise time update
-//#define BLYNK_PRINT Serial // for debugging 
 #include <Arduino.h>
 #include <U8g2lib.h>
 #ifdef U8X8_HAVE_HW_SPI
@@ -88,6 +71,8 @@ BLYNK_WRITE(V1) {
 #define select D7  //Button 2 = select (as I mentioned before, you can manage all commands by using 1 button only (short press = select, long press = change next page)
 int page = 0;      // select initial page
 //home or base coordinates (maybe changed by pressing Button 2 (or short press to menu if you are using only 1 button scheme)
+double Home_LAT0 = 55.704473; //if you need to setup home position and check distance from home
+double Home_LNG0 = 37.328169; //if you need to setup home position and check distance from home 
 double Home_LAT = 0; //if you need to setup home position and check distance from home
 double Home_LNG = 0; //if you need to setup home position and check distance from home 
 
@@ -116,13 +101,7 @@ static const unsigned char u8g_logo_sat[] U8X8_PROGMEM = {
 0x00,0x00,0x00,
 0x00,0x00,0x00,
 0x00,0x00,0x00,
-0x00,0x00,0x00
 
-//  0x00, 0x01, 0x00, 0x80, 0x07, 0x00, 0xc0, 0x06, 0x00, 0x60, 0x30, 0x00,
-//  0x60, 0x78, 0x00, 0xc0, 0xfc, 0x00, 0x00, 0xfe, 0x01, 0x00, 0xff, 0x01,
-//  0x80, 0xff, 0x00, 0xc0, 0x7f, 0x06, 0xc0, 0x3f, 0x06, 0x80, 0x1f, 0x0c,
-//  0x80, 0x4f, 0x06, 0x19, 0xc6, 0x03, 0x1b, 0x80, 0x01, 0x73, 0x00, 0x00,
-//  0x66, 0x00, 0x00, 0x0e, 0x00, 0x00, 0x3c, 0x00, 0x00, 0x70, 0x00, 0x00
 };
 //wave10px logo
 static const unsigned char u8g2_logo_wave[] U8X8_PROGMEM ={
@@ -134,7 +113,7 @@ static const unsigned char u8g2_logo_wave[] U8X8_PROGMEM ={
 
 // (GPS device wiring ) - we can change D5 (14) / D6(12) pins to any other GPIO, to avoid using native RX/TX wemos pins, because they must be not connected while loading sketch, but as I said before, after firing-up  2 digital inputs on my wemos controller, I have some deficite of I/o pins, and obliged touse these tx/rx pins. you may change gps tx/rx pins to any free digital pin 
 #include <SoftwareSerial.h>
-static const int RXPin = 14, TXPin = 12; // using standard rx/tx pins of D1 mini
+static const int RXPin = 14, TXPin = 12; // use any digital i/o pins of D1 mini
 static const uint32_t GPSBaud = 9600;
 SoftwareSerial ss(RXPin, TXPin);
 
@@ -150,8 +129,14 @@ int year;
 int num_sat; 
 int gps_speed;
 String heading; // direction, like S/NW/E etc
-//String bearing; // direction in degrees (if you like)
+String bearing; // direction in degrees (if you like)
 //int hour, minute, second; // if you wanna change time manually
+
+boolean button  = false;           // button press indication
+boolean press_flag = false;        // short press flag
+boolean long_press_flag = false;   // long press flag
+unsigned long last_press = 0;      // last time pressed
+int sign = 1;                      // for indication of press results
 
 
 
@@ -185,18 +170,10 @@ Blynk.config(auth);
 
 
 
-
-
 //LOOP
 void loop() {
 
   Get_GPS(); //Get GPS data
-boolean button  = false;           // Логическая переменная для хранения состояние кнопки
-boolean press_flag = false;        // Флажок нажатия кнопки
-boolean long_press_flag = false;   // Флажок долгого нажатия на кнопку
-unsigned long last_press = 0;      // переменная хранит момента последнего нажатия на кнопку
-
-
   if (digitalRead(menu) == HIGH)  // check if menu button pressed.
 {
      page = (page+1);
@@ -213,7 +190,7 @@ unsigned long last_press = 0;      // переменная хранит моме
   case 0: //page 1 clock
       u8g2.firstPage();
   do {
-     Page_num_1();  // first page
+     Page_clock();  // first page
   } while ( u8g2.nextPage() );
   delay(10);
   break;
@@ -221,7 +198,7 @@ unsigned long last_press = 0;      // переменная хранит моме
     case 1: // page 2 GPS location
   u8g2.firstPage();
   do {
-    print_location();
+    Page_location();
   } while ( u8g2.nextPage() );
   delay(10);
   break;
@@ -230,22 +207,69 @@ unsigned long last_press = 0;      // переменная хранит моме
      u8g2.firstPage();
   do {
     page_destination();
-    if (digitalRead(select) == HIGH)  //if you want to set up current pos as base (home) coordinates
-    { Home_LAT = gps.location.lat();
-    Home_LNG = gps.location.lng(); }
-    else 
-    { u8g2.setFont(u8g2_font_courR08_tr);
-      u8g2.setCursor(0, 64);
-      u8g2.print("Press to set base");
-    }   
-  } while ( u8g2.nextPage() );
+
+button = digitalRead(select) ;
+
+if (button == true  && press_flag == false && millis() - last_press > 100) {
+/*
+ * if button wasnt pressed before, and mow pressed > 100ms
+ */
+    press_flag = !press_flag;       // short press flag = up
+    last_press = millis();          // get last_press value (time)
+  }
+ 
+  if (button == true && press_flag == true && millis() - last_press > 2000) {
+// if the button still remained pressed > 2 seconds
+    long_press_flag = !long_press_flag;  // long press flag up
+    last_press = millis();          // het last_press time
+// Actions by this event (long press)
+Home_LAT = Home_LAT0;
+Home_LNG = Home_LNG0; 
+sign = 3;
+    
+
+  }
+
+  if (button == false && press_flag == true && long_press_flag == true) {
+// released button (after long press)
+    press_flag = !press_flag;            // short press flag down
+    long_press_flag = !long_press_flag;  // long press flag down
+  }
+
+  if (button == false && press_flag == true && long_press_flag == false) {
+// released button after short press
+    press_flag = !press_flag;  // short press flag down
+ // Actions by this event (short press)
+Home_LAT = gps.location.lat();
+Home_LNG = gps.location.lng(); 
+sign = 2;
+
+      }
+
+u8g2.setFont(u8g2_font_courR08_tr);
+u8g2.setCursor(0, 60);
+if (sign == 1) {
+u8g2.print("set destination");
+}
+if (sign == 2) {
+u8g2.print("current pos = base");
+}
+if (sign == 3) {
+u8g2.print("Destination = home");
+}    // finishes signs
+
+
+
+  }  // finished DO   
+  while ( u8g2.nextPage() );
   delay(10);
   break;
 
+  
 case 3:  // page 4 speedometer
    u8g2.firstPage();
   do {
-   print_speed();
+   Page_speed();
   } while ( u8g2.nextPage() );
   delay(10);
   break;
@@ -303,7 +327,7 @@ u8g2.setFont(u8g2_font_helvB12_tf);
 }  
 
 
-void Page_num_1()
+void Page_clock()
   {
     u8g2.setFont(u8g2_font_courB08_tn);
     u8g2.setCursor(105, 64);
@@ -326,7 +350,7 @@ void Page_num_1()
   
   }
   
-void print_speed() {
+void Page_speed() {
 
   
  u8g2.setFont(u8g2_font_crox1cb_tf);
@@ -354,7 +378,7 @@ void print_speed() {
   u8g2.print( heading);
 }
 
-void print_location()
+void Page_location()
 {
   u8g2.setFont(u8g2_font_crox1cb_tf);
   u8g2.setCursor(10, 10);
@@ -384,8 +408,7 @@ void print_location()
   
   }
 
-// This custom version of delay() ensures that the gps object
-// is being "fed".
+// This custom version of delay() ensures that the gps object is being "fed".
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
@@ -411,7 +434,7 @@ void Get_GPS()
     gps_speed = gps.speed.kmph();
 
    heading = gps.cardinal(gps.course.value());  // as standard directions W/E/S/N
-//    heading = gps.course.deg(); // get the direction - in degrees
+   bearing = gps.course.deg(); // get the direction - in degrees
 
   }
 
@@ -471,7 +494,7 @@ static void printTime(TinyGPSTime &t)
   else
   {
     char sz[32];
-    sprintf(sz, "%02d:%02d:%02d ", t.hour()+3, t.minute(), t.second());//скорректировали часовой пояс +3 часа
+    sprintf(sz, "%02d:%02d:%02d ", t.hour()+3, t.minute(), t.second());// hour +3 correction (for Moscow)
     u8g2.print(sz);
   }
 
@@ -495,8 +518,8 @@ unsigned long distancem =
       u8g2.setCursor(90, 20);
       u8g2.print(" m");
       
-//double courseTo =
-unsigned long courseTo =
+double courseTo =
+//unsigned long courseTo =
   TinyGPSPlus::courseTo(
     gps.location.lat(),
     gps.location.lng(),
@@ -507,13 +530,28 @@ unsigned long courseTo =
       u8g2.print("Course to: ");
       u8g2.setCursor(60, 30);
       u8g2.print(courseTo);
-      u8g2.setCursor(90, 30);
-      u8g2.print(" m");
+ //     u8g2.setCursor(90, 30);
+ //     u8g2.print(" m");
 
 String cardinalTo = TinyGPSPlus::cardinal(courseTo);
       u8g2.setCursor(0, 40);
       u8g2.print("Cardinal: ");
       u8g2.setCursor(60, 40);
       u8g2.print(cardinalTo);
+
+
+  u8g2.setFont(u8g2_font_glasstown_nbp_tf);
+  u8g2.setCursor(0,50);
+  u8g2.print("Head:");
+  u8g2.setCursor(25,50);
+  u8g2.print( heading);
+
+  u8g2.setFont(u8g2_font_glasstown_nbp_tf);
+  u8g2.setCursor(65,50);
+  u8g2.print("Bear:");
+  u8g2.setCursor(95,50);
+  u8g2.print( bearing);
+
+
 
 }
