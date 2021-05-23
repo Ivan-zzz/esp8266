@@ -51,9 +51,9 @@ technical message from tutorial:
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 
-char auth[] = "_lIcCNiBkZcEVbGPwIo8mvUBozLuz5En";              
-char ssid[] = "ASUS_X018D";  //connected to smartphone, but in real life you can use simcard module, or any other internet souece
-char pass[] = "12345678#";
+char auth[] = "_________"; // get key from Blynk website registering              
+char ssid[] = "______";  //wifi router or any other internet souece - ID
+char pass[] = "______#"; // password
 
 /*  it was in the tutorial, but we use virtual pins, so better get data directly from them later
 BLYNK_WRITE(V1) {
