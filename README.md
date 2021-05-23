@@ -11,7 +11,7 @@ Functionality:
 - GPS estimates the range between 2 points: current position and destination point
 - Destination point select by button (current position or pre-written into the sketch coordinates)
 - Indication on 0.96" oled (i2c)
-- Connection to the internet spource (data transferring to Blynk server/vidget). 
+- Connection to the internet (data transferring to Blynk server/vidget). 
  
 Pin connection:
 
