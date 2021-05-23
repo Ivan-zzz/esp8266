@@ -51,9 +51,9 @@ technical message from tutorial:
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #define BLYNK_PRINT Serial // for debugging 
-char auth[] = "_lIcCNiBkZcEVbGPwIo8mvUBozLuz5En"; // access token/id from blynk website
-char ssid[] = "ASUS_X018D";  // any internet source
-char pass[] = "12345678#";   // wifi password
+char auth[] = "_________________________"; // access token/id from blynk website
+char ssid[] = "_________";  // any internet source
+char pass[] = "_________";   // wifi password
 
 //--------------------blynk needs---------------
 
@@ -71,8 +71,8 @@ char pass[] = "12345678#";   // wifi password
 #define select D7  //Button 2 = select (as I mentioned before, you can manage all commands by using 1 button only (short press = select, long press = change next page)
 int page = 0;      // select initial page
 //home or base coordinates (maybe changed by pressing Button 2 (or short press to menu if you are using only 1 button scheme)
-double Home_LAT0 = 55.704473; //if you need to setup home position and check distance from home
-double Home_LNG0 = 37.328169; //if you need to setup home position and check distance from home 
+double Home_LAT0 = _____________; //if you need to setup home position and check distance from home
+double Home_LNG0 = _____________; //if you need to setup home position and check distance from home 
 double Home_LAT = 0; //if you need to setup home position and check distance from home
 double Home_LNG = 0; //if you need to setup home position and check distance from home 
 
