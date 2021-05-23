@@ -5,6 +5,16 @@ Wemos D1 mini / NodeMCU
 BLYNK data transferring + oled 0.96" (i2c) indication
 GPS neo-6m module + Wemos D1 mini (ESP8266)
 by Ivan-Z `2021
+
+Functionality:
+- GPS time and date 
+- GPS coordinates (Sattelites number, Lattitude, Longitude, Altitude, Heading, Bearing)
+- GPS speedometer
+- GPS estimates the range between 2 points: current position and destination point
+- Destination point select by button (current position or pre-written into the sketch coordinates)
+- Indication on 0.96" oled (i2c)
+ 
+
 Pin connection:
 Wemos D1 mini - GPS neo6m - Oled  - buttons
 -----------------------------------------------
