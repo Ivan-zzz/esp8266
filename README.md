@@ -15,6 +15,7 @@ Functionality:
 - Indication on 0.96" oled (i2c)
 - Connection to the internet spource (data transferring to Blynk server/vidget). 
  
+#
 
 Pin connection:
 Wemos D1 mini - GPS neo6m - Oled  - buttons
