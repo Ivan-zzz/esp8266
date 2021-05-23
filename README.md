@@ -1,5 +1,4 @@
-# esp8266
-Wemos D1 mini / NodeMCU
+# esp8266 Wemos D1 mini
 BLYNK data transferring + oled 0.96" (i2c) indication
 GPS neo-6m module + Wemos D1 mini (ESP8266)
 by Ivan-Z `2021
