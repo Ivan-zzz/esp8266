@@ -11,8 +11,8 @@ Wemos D1 mini - GPS neo6m - Oled  - buttons
 GND           - GNC       - GND   - GND (with resistor 10k)
 D2 (gpio4)sda - nc        - SDA   - nc
 D1 (gpio5)scl - nc        - SCK   - nc
-RX (gpio3)    - TX        - nc    - nc
-TX (gpio1)    - RX        - nc    - nc
+D5 (gpio14)    - TX        - nc    - nc
+D6 (gpio12)    - RX        - nc    - nc
 D0 (gpio16)   - nc        - nc    - button 1 (menu)
 D7 (gpio13)   - nc        - nc    - button 2 (select). because of non-working input ports D3/D4 (which I melted by 5v input signal), its possible to manage all commands by only 1 button, and freeup HSPI 4 pins for sd card, for example. To avoid using 2nd button, select by short press, and menu change by long press...
 usually gpio 12.13.14.15 are used for HSPI connections... so change buttonn pins to D3/D4 if you need SPI.
@@ -132,9 +132,9 @@ static const unsigned char u8g2_logo_wave[] U8X8_PROGMEM ={
 
 
 
-// (GPS device wiring ) - we can change RX/TX pins to any other GPIO, to avoid using native RX/TX wemos pins, because they must be not connected while loading sketch, but as I said before, after firing-up  2 digital inputs on my wemos controller, I have some deficite of I/o pins, and obliged touse these tx/rx pins. you may change gps tx/rx pins to any free digital pin 
+// (GPS device wiring ) - we can change D5 (14) / D6(12) pins to any other GPIO, to avoid using native RX/TX wemos pins, because they must be not connected while loading sketch, but as I said before, after firing-up  2 digital inputs on my wemos controller, I have some deficite of I/o pins, and obliged touse these tx/rx pins. you may change gps tx/rx pins to any free digital pin 
 #include <SoftwareSerial.h>
-static const int RXPin = 3, TXPin = 1; // using standard rx/tx pins of D1 mini
+static const int RXPin = 14, TXPin = 12; // using standard rx/tx pins of D1 mini
 static const uint32_t GPSBaud = 9600;
 SoftwareSerial ss(RXPin, TXPin);
 
