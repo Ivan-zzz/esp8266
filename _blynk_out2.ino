@@ -67,8 +67,8 @@ QMC5883LCompass compass;
 #include <BlynkSimpleEsp8266.h>
 #define BLYNK_PRINT Serial // for debugging 
 char auth[] = "_lIcCNiBkZcEVbGPwIo8mvUBozLuz5En"; // access token/id from blynk website
-char ssid[] = "ASUS_X018D";  // any internet source
-char pass[] = "12345678#";   // wifi password
+char ssid[] = "your wifi connection";  // any internet source
+char pass[] = "password for WIFI";   // wifi password
 
 //--------------------blynk needs---------------
 
