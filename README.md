@@ -11,6 +11,7 @@ Functionality:
 - Destination point select by button (current position or pre-written into the sketch coordinates)
 - Indication on 0.96" oled (i2c)
 - Connection to the internet (data transferring to Blynk server/vidget). 
+- 5883 magnet compas module added, indication: gauge + bearing. 
  
 Pin connection:
 
