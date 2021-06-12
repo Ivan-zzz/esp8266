@@ -33,7 +33,7 @@ D6 (gpio12)   - RX        - nc    - nc                      - nc
 
 D0 (gpio16)   - nc        - nc    - button 1 (menu)         - nc
 
-D7 (gpio13)   - nc        - nc    - button 2 (select).
+D7 (gpio13)   - nc        - nc    - button 2 (select)       - nc.
 
 
 Long press of select button added. Short press = current point becomes destination. 
