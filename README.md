@@ -1,6 +1,6 @@
 # esp8266 Wemos D1 mini
 BLYNK data transferring + oled 0.96" (i2c) indication
-GPS neo-6m module + Wemos D1 mini (ESP8266)
+GPS neo-6m module + Wemos D1 mini (ESP8266) + 5883 compass
 by Ivan-Z `2021
 
 Functionality:
